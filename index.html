@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebAI Directory — Best AI Tools for the Modern Web</title>
+  <meta name="description" content="Curated directory of the best AI apps for writing, image, audio, agents, and developers. Zero fluff." />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>WebAI Directory</h1>
+      <p class="subtitle">Discover the best AI tools for the modern web. Curated, not crowded.</p>
+      <div class="search">
+        <input type="text" id="searchInput" placeholder="Search AI tools..." />
+      </div>
+    </header>
+
+    <div class="categories" id="categoryButtons"></div>
+
+    <div id="appsContainer"></div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>
+        Part of the <a href="https://nextechdomains.com" target="_blank">Nextech Domains</a> portfolio.<br>
+        Built for builders. Updated May 2025.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Load apps
+    let allApps = {};
+    let currentCategory = 'all';
+
+    fetch('apps.json')
+      .then(res => res.json())
+      .then(data => {
+        allApps = data;
+        renderCategoryButtons();
+        renderApps('all');
+      });
+
+    function renderCategoryButtons() {
+      const container = document.getElementById('categoryButtons');
+      const categories = Object.keys(allApps);
+      container.innerHTML = `
+        <button class="category-btn active" data-category="all">All Tools</button>
+        ${categories.map(cat => 
+          `<button class="category-btn" data-category="${cat}">${formatCategory(cat)}</button>`
+        ).join('')}
+      `;
+      container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('category-btn')) {
+          document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+          e.target.classList.add('active');
+          currentCategory = e.target.dataset.category;
+          filterApps();
+        }
+      });
+    }
+
+    function formatCategory(cat) {
+      const map = {
+        writing: '🧠 Writing',
+        image: '🖼️ Image',
+        audio: '🔊 Audio',
+        agents: '🤖 Agents',
+        dev: '🛠️ Dev'
+      };
+      return map[cat] || cat;
+    }
+
+    function renderApps(category) {
+      const container = document.getElementById('appsContainer');
+      let apps = [];
+      if (category === 'all') {
+        apps = Object.values(allApps).flat();
+      } else {
+        apps = allApps[category] || [];
+      }
+      container.innerHTML = `
+        <div class="apps-grid">
+          ${apps.map(app => `
+            <div class="app-card">
+              <h3>${app.name}</h3>
+              <p>${app.desc}</p>
+              <div class="tags">
+                ${app.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+              </div>
+              <a href="${app.url}" class="visit-btn" target="_blank" rel="noopener">Visit →</a>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function filterApps() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      let apps = [];
+      if (currentCategory === 'all') {
+        apps = Object.values(allApps).flat();
+      } else {
+        apps = allApps[currentCategory] || [];
+      }
+      const filtered = apps.filter(app =>
+        app.name.toLowerCase().includes(searchTerm) ||
+        app.desc.toLowerCase().includes(searchTerm)
+      );
+      const container = document.getElementById('appsContainer');
+      container.innerHTML = `
+        <div class="apps-grid">
+          ${filtered.map(app => `
+            <div class="app-card">
+              <h3>${app.name}</h3>
+              <p>${app.desc}</p>
+              <div class="tags">
+                ${app.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+              </div>
+              <a href="${app.url}" class="visit-btn" target="_blank" rel="noopener">Visit →</a>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterApps);
+  </script>
+</body>
+</html>
